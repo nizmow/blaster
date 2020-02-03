@@ -49,7 +49,7 @@ func main() {
 	Entities = append(Entities, Entity{
 		1,
 		"Player",
-		[]Component{Renderable{ player, 100, 100}},
+		[]Component{Renderable{player, 100, 100}},
 	})
 
 	if err := ebiten.Run(update, 640, 480, 2, "Hello World"); err != nil {

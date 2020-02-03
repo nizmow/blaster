@@ -8,8 +8,8 @@ type Component interface {
 
 type Renderable struct {
 	image *ebiten.Image
-	x int
-	y int
+	x     int
+	y     int
 }
 
 func (Renderable) ComponentName() string {
