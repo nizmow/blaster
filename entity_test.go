@@ -37,9 +37,9 @@ func Test_ComponentsJoin(t *testing.T) {
 	componentPlayer := TestPlayer{}
 	componentEnemy := TestEnemy{}
 
-	entityPlayer.Components = []Component{componentPlayer, componentRenderable1}
-	entityEnemy.Components = []Component{componentEnemy, componentRenderable2}
-	world.Entities = []Entity{entityPlayer, entityEnemy}
+	entityPlayer.components = []Component{componentPlayer, componentRenderable1}
+	entityEnemy.components = []Component{componentEnemy, componentRenderable2}
+	world.entities = []Entity{entityPlayer, entityEnemy}
 
 	results := ComponentsJoin(world, TestPlayerType, TestRenderableType)
 

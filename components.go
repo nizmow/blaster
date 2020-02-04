@@ -7,8 +7,9 @@ import (
 type ComponentType int
 
 const (
-	RenderableType ComponentType = 0
-	PlayerType     ComponentType = 1
+	RenderableType   ComponentType = iota
+	PlayerType       ComponentType = iota
+	PlayerBulletType ComponentType = iota
 )
 
 // Base
@@ -23,10 +24,30 @@ type Renderable struct {
 	Y     int
 }
 
-func (Renderable) ComponentType() ComponentType {
+func (*Renderable) ComponentType() ComponentType {
 	return RenderableType
 }
 
 func NewRenderable(image *ebiten.Image, x int, y int) *Renderable {
 	return &Renderable{image, x, y}
+}
+
+type Player struct{}
+
+func (*Player) ComponentType() ComponentType {
+	return PlayerType
+}
+
+func NewPlayer() *Player {
+	return &Player{}
+}
+
+type PlayerBullet struct{}
+
+func (*PlayerBullet) ComponentType() ComponentType {
+	return PlayerBulletType
+}
+
+func NewPlayerBullet() *PlayerBullet {
+	return &PlayerBullet{}
 }

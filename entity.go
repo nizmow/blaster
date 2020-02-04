@@ -1,13 +1,20 @@
 package main
 
+var entityIdSequence int
+
+func init() {
+	entityIdSequence = 0
+}
+
 type Entity struct {
 	ID         int
 	EntityName string
 	components []Component
 }
 
-func NewEntity(id int, entityName string) *Entity {
-	return &Entity{ID: id, EntityName: entityName}
+func NewEntity(entityName string) *Entity {
+	entityIdSequence++
+	return &Entity{ID: entityIdSequence, EntityName: entityName}
 }
 
 func (e *Entity) AddComponent(c Component) *Entity {
