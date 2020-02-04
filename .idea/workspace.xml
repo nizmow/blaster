@@ -2,12 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8a43281c-e7de-4f5c-917e-72f63c9ec7c1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/entity_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components.go" beforeDir="false" afterPath="$PROJECT_DIR$/components.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/entities.go" beforeDir="false" afterPath="$PROJECT_DIR$/entity.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entity.go" beforeDir="false" afterPath="$PROJECT_DIR$/entity.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entity_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/entity_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,7 +125,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Messed up my module, of course" />
-    <option name="LAST_COMMIT_MESSAGE" value="Messed up my module, of course" />
+    <MESSAGE value="Build and test my component join method..." />
+    <option name="LAST_COMMIT_MESSAGE" value="Build and test my component join method..." />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -146,10 +145,10 @@
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
     <state x="1563" y="640" width="490" height="553" key="#xdebugger.evaluate/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580828210622" />
-    <state x="949" y="318" width="1108" height="976" key="CommitChangelistDialog2" timestamp="1580743954590">
+    <state x="949" y="318" width="1108" height="976" key="CommitChangelistDialog2" timestamp="1580828504649">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
-    <state x="949" y="318" width="1108" height="976" key="CommitChangelistDialog2/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580743954590" />
+    <state x="949" y="318" width="1108" height="976" key="CommitChangelistDialog2/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580828504649" />
     <state width="698" height="466" key="DebuggerActiveHint" timestamp="1580828107041">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
@@ -158,22 +157,22 @@
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
     <state x="1091" y="478" key="FileChooserDialogImpl/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580734955798" />
-    <state width="2454" height="413" key="GridCell.Tab.0.bottom" timestamp="1580828458886">
+    <state width="2454" height="413" key="GridCell.Tab.0.bottom" timestamp="1580829540888">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
-    <state width="2454" height="413" key="GridCell.Tab.0.bottom/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580828458886" />
-    <state width="2454" height="413" key="GridCell.Tab.0.center" timestamp="1580828458886">
+    <state width="2454" height="413" key="GridCell.Tab.0.bottom/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580829540888" />
+    <state width="2454" height="413" key="GridCell.Tab.0.center" timestamp="1580829540888">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
-    <state width="2454" height="413" key="GridCell.Tab.0.center/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580828458886" />
-    <state width="2454" height="413" key="GridCell.Tab.0.left" timestamp="1580828458886">
+    <state width="2454" height="413" key="GridCell.Tab.0.center/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580829540888" />
+    <state width="2454" height="413" key="GridCell.Tab.0.left" timestamp="1580829540888">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
-    <state width="2454" height="413" key="GridCell.Tab.0.left/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580828458886" />
-    <state width="2454" height="413" key="GridCell.Tab.0.right" timestamp="1580828458886">
+    <state width="2454" height="413" key="GridCell.Tab.0.left/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580829540888" />
+    <state width="2454" height="413" key="GridCell.Tab.0.right" timestamp="1580829540888">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
-    <state width="2454" height="413" key="GridCell.Tab.0.right/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580828458886" />
+    <state width="2454" height="413" key="GridCell.Tab.0.right/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580829540888" />
     <state width="2454" height="508" key="GridCell.Tab.1.bottom" timestamp="1580828213320">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
@@ -190,25 +189,16 @@
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
     <state width="2454" height="508" key="GridCell.Tab.1.right/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580828213320" />
-    <state x="903" y="456" key="Vcs.Push.Dialog.v2" timestamp="1580743958183">
+    <state x="903" y="456" key="Vcs.Push.Dialog.v2" timestamp="1580828508162">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
-    <state x="903" y="456" key="Vcs.Push.Dialog.v2/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580743958183" />
+    <state x="903" y="456" key="Vcs.Push.Dialog.v2/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580828508162" />
     <state x="974" y="325" width="672" height="678" key="search.everywhere.popup" timestamp="1580827770459">
       <screen x="63" y="0" width="2497" height="1440" />
     </state>
     <state x="974" y="325" width="672" height="678" key="search.everywhere.popup/63.0.2497.1440/2560.-620.1440.2560@63.0.2497.1440" timestamp="1580827770459" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/entity.go</url>
-          <line>22</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="GoTestRunConfiguration">
         <watch expression="entityComponent.ComponentName()" language="go" />

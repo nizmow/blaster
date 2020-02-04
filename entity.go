@@ -7,14 +7,14 @@ type Entity struct {
 }
 
 // todo: work out whether I should pass variable params as pointers? eg: c ...*Component
-func ComponentsJoin(world World, requestedComponents ...string) []map[string]Component {
+func ComponentsJoin(world World, requestedComponents ...ComponentType) []map[ComponentType]Component {
 
-	var results []map[string]Component
+	var results []map[ComponentType]Component
 
 	// for all entities in the world
 	for _, entity := range world.Entities {
 		// for each component in this entity
-		resultsForEntity := make(map[string]Component)
+		resultsForEntity := make(map[ComponentType]Component)
 		for _, entityComponent := range entity.Components {
 
 			// for each component we requested
@@ -23,7 +23,7 @@ func ComponentsJoin(world World, requestedComponents ...string) []map[string]Com
 					resultsForEntity[requestedComponent] = nil
 				}
 
-				if entityComponent.ComponentName() == requestedComponent {
+				if entityComponent.ComponentType() == requestedComponent {
 					resultsForEntity[requestedComponent] = entityComponent
 				}
 			}

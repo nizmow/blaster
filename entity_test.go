@@ -2,22 +2,28 @@ package main
 
 import "testing"
 
+const (
+	TestRenderableType ComponentType = iota
+	TestPlayerType     ComponentType = iota
+	TestEnemyType      ComponentType = iota
+)
+
 type TestRenderable struct{}
 
-func (TestRenderable) ComponentName() string {
-	return "TestRenderable"
+func (TestRenderable) ComponentType() ComponentType {
+	return TestRenderableType
 }
 
 type TestPlayer struct{}
 
-func (TestPlayer) ComponentName() string {
-	return "TestPlayer"
+func (TestPlayer) ComponentType() ComponentType {
+	return TestPlayerType
 }
 
 type TestEnemy struct{}
 
-func (TestEnemy) ComponentName() string {
-	return "TestEnemy"
+func (TestEnemy) ComponentType() ComponentType {
+	return TestEnemyType
 }
 
 func Test_ComponentsJoin(t *testing.T) {
@@ -35,13 +41,13 @@ func Test_ComponentsJoin(t *testing.T) {
 	entityEnemy.Components = []Component{componentEnemy, componentRenderable2}
 	world.Entities = []Entity{entityPlayer, entityEnemy}
 
-	results := ComponentsJoin(world, "TestPlayer", "TestRenderable")
+	results := ComponentsJoin(world, TestPlayerType, TestRenderableType)
 
 	if len(results) != 1 {
 		t.Errorf("Expected 1 result and got %v", len(results))
 	}
 
-	results2 := ComponentsJoin(world, "TestPlayer", "TestEnemy")
+	results2 := ComponentsJoin(world, TestPlayerType, TestEnemyType)
 	if len(results2) != 0 {
 		t.Errorf("Expected 0 results and got %v", len(results2))
 	}
