@@ -15,6 +15,8 @@ type World struct {
 
 var world World
 
+var renderer Renderer
+
 func update(screen *ebiten.Image) error {
 	if ebiten.IsDrawingSkipped() {
 		return nil
@@ -22,13 +24,8 @@ func update(screen *ebiten.Image) error {
 
 	screen.Fill(color.NRGBA{0xff, 0x00, 0x00, 0xff})
 
-	renderables := Components(world, RenderableType)
-	for _, renderCandidate := range renderables {
-		render := renderCandidate.(*Renderable)
-		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(float64(render.X), float64(render.Y))
-		screen.DrawImage(render.Image, opts)
-	}
+	renderer := NewRenderer(screen)
+	renderer.Update(world)
 
 	return nil
 }

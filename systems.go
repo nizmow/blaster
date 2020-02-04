@@ -1,14 +1,25 @@
 package main
 
+import "github.com/hajimehoshi/ebiten"
+
 type System interface {
-	Update()
+	Update(World)
 }
 
 type Renderer struct {
+	screen *ebiten.Image
 }
 
-func (Renderer) Update(entities *[]Entity) {
-	//for _, entity := range *entities {
-	//	renderable := sort.Search(len(entity.components), func(int i) { return entity.components[i].ComponentName() == "Renderable" })
-	//}
+func NewRenderer(screen *ebiten.Image) Renderer {
+	return Renderer{screen}
+}
+
+func (r Renderer) Update(world World) {
+	renderables := Components(world, RenderableType)
+	for _, renderCandidate := range renderables {
+		render := renderCandidate.(*Renderable)
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Translate(float64(render.X), float64(render.Y))
+		r.screen.DrawImage(render.Image, opts)
+	}
 }
