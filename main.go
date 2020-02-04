@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 var square *ebiten.Image
@@ -23,17 +22,13 @@ func update(screen *ebiten.Image) error {
 
 	screen.Fill(color.NRGBA{0xff, 0x00, 0x00, 0xff})
 
-	ebitenutil.DebugPrint(screen, "Hello world")
-
-	if square == nil {
-		square, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
+	renderables := Components(world, RenderableType)
+	for _, renderCandidate := range renderables {
+		render := renderCandidate.(*Renderable)
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Translate(float64(render.X), float64(render.Y))
+		screen.DrawImage(render.Image, opts)
 	}
-
-	square.Fill(color.White)
-
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(64, 64)
-	screen.DrawImage(square, opts)
 
 	return nil
 }
@@ -47,7 +42,7 @@ func main() {
 	world.Entities = append(world.Entities, Entity{
 		1,
 		"Player",
-		[]Component{Renderable{player, 100, 100}},
+		[]Component{&Renderable{player, 100, 100}},
 	})
 
 	if err := ebiten.Run(update, 640, 480, 2, "Hello World"); err != nil {

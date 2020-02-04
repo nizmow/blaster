@@ -6,6 +6,20 @@ type Entity struct {
 	Components []Component
 }
 
+func Components(world World, requestedComponent ComponentType) []Component {
+	var results []Component
+
+	for _, entity := range world.Entities {
+		for _, entityComponent := range entity.Components {
+			if entityComponent.ComponentType() == requestedComponent {
+				results = append(results, entityComponent)
+			}
+		}
+	}
+
+	return results
+}
+
 // todo: work out whether I should pass variable params as pointers? eg: c ...*Component
 func ComponentsJoin(world World, requestedComponents ...ComponentType) []map[ComponentType]Component {
 
