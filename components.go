@@ -27,6 +27,6 @@ func (Renderable) ComponentType() ComponentType {
 	return RenderableType
 }
 
-func NewRenderable(image *ebiten.Image, x int, y int) {
-	return
+func NewRenderable(image *ebiten.Image, x int, y int) *Renderable {
+	return &Renderable{image, x, y}
 }

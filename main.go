@@ -48,12 +48,12 @@ func main() {
 	// player entity
 	player, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	player.Fill(color.White)
-	world.AddEntity(*NewEntity(1, "Player").AddComponent(&Renderable{player, 100, 100}))
+	world.AddEntity(*NewEntity(1, "Player").AddComponent(NewRenderable(player, 100, 100)))
 
 	// systems
 	renderer = Renderer{}
 
-	if err := ebiten.Run(update, 640, 480, 2, "Hello World"); err != nil {
+	if err := ebiten.Run(update, 320, 240, 2, "Hello World"); err != nil {
 		log.Fatal(err)
 	}
 }

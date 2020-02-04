@@ -34,9 +34,7 @@ func Components(world World, requestedComponent ComponentType) []Component {
 	return results
 }
 
-// todo: work out whether I should pass variable params as pointers? eg: c ...*Component
 func ComponentsJoin(world World, requestedComponents ...ComponentType) []map[ComponentType]Component {
-
 	var results []map[ComponentType]Component
 
 	// for all entities in the world
