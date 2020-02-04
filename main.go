@@ -10,13 +10,11 @@ import (
 
 var square *ebiten.Image
 
-type Entity struct {
-	id         int
-	entityName string
-	components []Component
+type World struct {
+	Entities []Entity
 }
 
-var Entities []Entity
+var world World
 
 func update(screen *ebiten.Image) error {
 	if ebiten.IsDrawingSkipped() {
@@ -46,7 +44,7 @@ func main() {
 	// player entity
 	player, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	player.Fill(color.White)
-	Entities = append(Entities, Entity{
+	world.Entities = append(world.Entities, Entity{
 		1,
 		"Player",
 		[]Component{Renderable{player, 100, 100}},

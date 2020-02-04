@@ -1,15 +1,19 @@
 package main
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"github.com/hajimehoshi/ebiten"
+)
 
+// Base
 type Component interface {
 	ComponentName() string
 }
 
+// Renderable
 type Renderable struct {
-	image *ebiten.Image
-	x     int
-	y     int
+	Image *ebiten.Image
+	X     int
+	Y     int
 }
 
 func (Renderable) ComponentName() string {
