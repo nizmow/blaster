@@ -26,3 +26,7 @@ type Renderable struct {
 func (Renderable) ComponentType() ComponentType {
 	return RenderableType
 }
+
+func NewRenderable(image *ebiten.Image, x int, y int) {
+	return
+}

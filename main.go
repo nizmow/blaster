@@ -7,10 +7,16 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-var square *ebiten.Image
-
 type World struct {
-	Entities []Entity
+	entities []Entity
+}
+
+func (w *World) AddEntity(e Entity) *World {
+	w.entities = append(w.entities, e)
+	return w
+}
+func (w *World) GetEntities() []Entity {
+	return w.entities
 }
 
 var world World
@@ -22,10 +28,16 @@ func update(screen *ebiten.Image) error {
 		return nil
 	}
 
-	screen.Fill(color.NRGBA{0xff, 0x00, 0x00, 0xff})
+	var err error
 
-	renderer := NewRenderer(screen)
-	renderer.Update(world)
+	err = screen.Fill(color.NRGBA{0xff, 0x00, 0x00, 0xff})
+	if err != nil {
+		return err
+	}
+	err = renderer.Update(world, screen)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -36,11 +48,10 @@ func main() {
 	// player entity
 	player, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	player.Fill(color.White)
-	world.Entities = append(world.Entities, Entity{
-		1,
-		"Player",
-		[]Component{&Renderable{player, 100, 100}},
-	})
+	world.AddEntity(*NewEntity(1, "Player").AddComponent(&Renderable{player, 100, 100}))
+
+	// systems
+	renderer = Renderer{}
 
 	if err := ebiten.Run(update, 640, 480, 2, "Hello World"); err != nil {
 		log.Fatal(err)
