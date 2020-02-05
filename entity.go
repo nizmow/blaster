@@ -27,13 +27,23 @@ func (e *Entity) GetComponents() []Component {
 	return e.components
 }
 
-func Components(world World, requestedComponent ComponentType) []Component {
-	var results []Component
+type FindComponentsResult struct {
+	Entity             Entity
+	RequestedComponent Component
+}
+
+type FindComponentsJoinResult struct {
+	Entity              Entity
+	RequestedComponents map[ComponentType]Component
+}
+
+func (world World) FindComponents(requestedComponent ComponentType) []FindComponentsResult {
+	var results []FindComponentsResult
 
 	for _, entity := range world.GetEntities() {
 		for _, entityComponent := range entity.GetComponents() {
 			if entityComponent.ComponentType() == requestedComponent {
-				results = append(results, entityComponent)
+				results = append(results, FindComponentsResult{entity, entityComponent})
 			}
 		}
 	}
@@ -41,36 +51,37 @@ func Components(world World, requestedComponent ComponentType) []Component {
 	return results
 }
 
-func ComponentsJoin(world World, requestedComponents ...ComponentType) []map[ComponentType]Component {
-	var results []map[ComponentType]Component
+func (world World) FindComponentsJoin(requestedComponents ...ComponentType) []FindComponentsJoinResult {
+	var results []FindComponentsJoinResult
 
 	// for all entities in the world
 	for _, entity := range world.GetEntities() {
 		// for each component in this entity
-		resultsForEntity := make(map[ComponentType]Component)
+		matchedComponents := make(map[ComponentType]Component)
 		for _, entityComponent := range entity.GetComponents() {
 
 			// for each component we requested
 			for _, requestedComponent := range requestedComponents {
-				if _, present := resultsForEntity[requestedComponent]; !present {
-					resultsForEntity[requestedComponent] = nil
+				if _, present := matchedComponents[requestedComponent]; !present {
+					matchedComponents[requestedComponent] = nil
 				}
 
 				if entityComponent.ComponentType() == requestedComponent {
-					resultsForEntity[requestedComponent] = entityComponent
+					matchedComponents[requestedComponent] = entityComponent
 				}
 			}
 
 			// validate we got all of the components requested for each join
-			complete := true
-			for _, value := range resultsForEntity {
+			successful := true
+			for _, value := range matchedComponents {
 				if value == nil {
-					complete = false
+					successful = false
 					break
 				}
 			}
-			if complete {
-				results = append(results, resultsForEntity)
+			if successful {
+				r := FindComponentsJoinResult{entity, matchedComponents}
+				results = append(results, r)
 			}
 		}
 	}

@@ -14,12 +14,22 @@ type World struct {
 	entities []Entity
 }
 
-func (w *World) AddEntity(e Entity) *World {
-	w.entities = append(w.entities, e)
-	return w
+func (world *World) AddEntity(e Entity) *World {
+	world.entities = append(world.entities, e)
+	return world
 }
-func (w *World) GetEntities() []Entity {
-	return w.entities
+
+func (world *World) RemoveEntity(idToRemove int) {
+	for i, e := range world.entities {
+		if e.ID == idToRemove {
+			world.entities = append(world.entities[:i], world.entities[i+1:]...)
+			break
+		}
+	}
+}
+
+func (world *World) GetEntities() []Entity {
+	return world.entities
 }
 
 var world World

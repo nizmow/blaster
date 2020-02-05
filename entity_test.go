@@ -41,13 +41,13 @@ func Test_ComponentsJoin(t *testing.T) {
 	entityEnemy.components = []Component{componentEnemy, componentRenderable2}
 	world.entities = []Entity{entityPlayer, entityEnemy}
 
-	results := ComponentsJoin(world, TestPlayerType, TestRenderableType)
+	results := world.FindComponentsJoin(TestPlayerType, TestRenderableType)
 
 	if len(results) != 1 {
 		t.Errorf("Expected 1 result and got %v", len(results))
 	}
 
-	results2 := ComponentsJoin(world, TestPlayerType, TestEnemyType)
+	results2 := world.FindComponentsJoin(TestPlayerType, TestEnemyType)
 	if len(results2) != 0 {
 		t.Errorf("Expected 0 results and got %v", len(results2))
 	}

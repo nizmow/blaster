@@ -12,9 +12,9 @@ const MaxPlayerBullets = 5
 type Renderer struct{}
 
 func (Renderer) Update(world World, screen *ebiten.Image) error {
-	renderables := Components(world, RenderableType)
+	renderables := world.FindComponents(RenderableType)
 	for _, renderCandidate := range renderables {
-		render := renderCandidate.(*Renderable)
+		render := renderCandidate.RequestedComponent.(*Renderable)
 		opts := &ebiten.DrawImageOptions{}
 		opts.GeoM.Translate(float64(render.X), float64(render.Y))
 		err := screen.DrawImage(render.Image, opts)
@@ -28,10 +28,9 @@ func (Renderer) Update(world World, screen *ebiten.Image) error {
 type PlayerInput struct{}
 
 func (PlayerInput) Update(world *World) error {
-	// gets components with both RenderableType and PlayerType, hopefully only one!
-	player := ComponentsJoin(*world, RenderableType, PlayerType)[0]
+	player := world.FindComponentsJoin(RenderableType, PlayerType)[0]
 
-	playerRenderable := player[RenderableType].(*Renderable)
+	playerRenderable := player.RequestedComponents[RenderableType].(*Renderable)
 
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft):
@@ -45,13 +44,16 @@ func (PlayerInput) Update(world *World) error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-		playerBulletComponents := ComponentsJoin(*world, PlayerBulletType)
+		playerBulletComponents := world.FindComponents(PlayerBulletType)
 		if len(playerBulletComponents) <= MaxPlayerBullets {
+			bulletEntity := NewEntity("Player Bullet")
+
+			bulletEntity.AddComponent(NewPlayerBullet())
+
 			image, _ := ebiten.NewImage(2, 2, ebiten.FilterNearest)
 			image.Fill(color.White)
-			bulletEntity := NewEntity("Player Bullet")
-			bulletEntity.AddComponent(NewPlayerBullet())
 			bulletEntity.AddComponent(NewRenderable(image, playerRenderable.X+7, playerRenderable.Y))
+
 			world.AddEntity(*bulletEntity)
 		}
 	}
@@ -62,14 +64,14 @@ func (PlayerInput) Update(world *World) error {
 type PlayerBulletMover struct{}
 
 func (PlayerBulletMover) Update(world *World) error {
-	allPlayerBulletComponents := ComponentsJoin(*world, RenderableType, PlayerBulletType)
+	allPlayerBulletComponents := world.FindComponentsJoin(RenderableType, PlayerBulletType)
 
 	for _, playerBulletComponents := range allPlayerBulletComponents {
-		playerBulletRenderable := playerBulletComponents[RenderableType].(*Renderable)
+		playerBulletRenderable := playerBulletComponents.RequestedComponents[RenderableType].(*Renderable)
 		if playerBulletRenderable.Y > 0 {
 			playerBulletRenderable.Y -= 5
 		} else {
-			// well we need some way to remove this!
+			world.RemoveEntity(playerBulletComponents.Entity.ID)
 		}
 	}
 
