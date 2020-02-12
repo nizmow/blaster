@@ -69,9 +69,24 @@ func main() {
 	// setup
 
 	// player entity
-	player, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
-	player.Fill(color.White)
-	world.AddEntity(*NewEntity("Player").AddComponent(NewRenderable(player, (ScreenWidth-16)/2, 200)).AddComponent(NewPlayer()))
+	playerEntity := NewEntity("Player")
+	playerImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
+	playerImage.Fill(color.White)
+	playerEntity.AddComponent(NewRenderable(playerImage, (ScreenWidth-16)/2, 200))
+	playerEntity.AddComponent(NewPlayer())
+	world.AddEntity(*playerEntity)
+
+	baddieEntity := NewEntity("Baddie")
+	baddieImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
+	baddieImage.Fill(color.RGBA{
+		R: 255,
+		G: 0,
+		B: 0,
+		A: 255,
+	})
+	baddieEntity.AddComponent(NewRenderable(baddieImage, (ScreenWidth-16)/2, 20))
+	baddieEntity.AddComponent(NewBaddie())
+	world.AddEntity(*baddieEntity)
 
 	// systems
 	renderer = Renderer{}

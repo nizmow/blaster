@@ -16,7 +16,7 @@ func (Renderer) Update(world World, screen *ebiten.Image) error {
 	for _, renderCandidate := range renderables {
 		render := renderCandidate.RequestedComponent.(*Renderable)
 		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(float64(render.X), float64(render.Y))
+		opts.GeoM.Translate(float64(render.Location.X), float64(render.Location.Y))
 		err := screen.DrawImage(render.Image, opts)
 		if err != nil {
 			return err
@@ -34,12 +34,12 @@ func (PlayerInput) Update(world *World) error {
 
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft):
-		if playerRenderable.X > 2 {
-			playerRenderable.X -= PlayerSpeed
+		if playerRenderable.Location.X > 2 {
+			playerRenderable.Location.X -= PlayerSpeed
 		}
 	case ebiten.IsKeyPressed(ebiten.KeyRight):
-		if playerRenderable.X < ScreenWidth-18 {
-			playerRenderable.X += PlayerSpeed
+		if playerRenderable.Location.X < ScreenWidth-18 {
+			playerRenderable.Location.X += PlayerSpeed
 		}
 	}
 
@@ -52,7 +52,7 @@ func (PlayerInput) Update(world *World) error {
 
 			image, _ := ebiten.NewImage(2, 2, ebiten.FilterNearest)
 			image.Fill(color.White)
-			bulletEntity.AddComponent(NewRenderable(image, playerRenderable.X+7, playerRenderable.Y))
+			bulletEntity.AddComponent(NewRenderable(image, playerRenderable.Location.X+7, playerRenderable.Location.Y))
 
 			world.AddEntity(*bulletEntity)
 		}
@@ -68,8 +68,8 @@ func (PlayerBulletMover) Update(world *World) error {
 
 	for _, playerBulletComponents := range allPlayerBulletComponents {
 		playerBulletRenderable := playerBulletComponents.RequestedComponents[RenderableType].(*Renderable)
-		if playerBulletRenderable.Y > 0 {
-			playerBulletRenderable.Y -= 5
+		if playerBulletRenderable.Location.Y > 0 {
+			playerBulletRenderable.Location.Y -= 5
 		} else {
 			world.RemoveEntity(playerBulletComponents.Entity.ID)
 		}
@@ -77,3 +77,18 @@ func (PlayerBulletMover) Update(world *World) error {
 
 	return nil
 }
+
+//type PlayerBulletBaddieCollider struct{}
+//
+//func (PlayerBulletBaddieCollider) Update(world *World) error {
+//	allPlayerBullets := world.FindComponentsJoin(RenderableType, PlayerBulletType)
+//	allBaddies := world.FindComponentsJoin(RenderableType, BaddieType)
+//
+//	for _, playerBullet := range allPlayerBullets {
+//		playerBulletRenderable := playerBullet.RequestedComponents[RenderableType].(*Renderable)
+//
+//		for _, baddie := range allBaddies {
+//
+//		}
+//	}
+//}
