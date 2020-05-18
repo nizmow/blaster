@@ -1,30 +1,7 @@
-package main
+package ecs
 
-var entityIdSequence int
-
-func init() {
-	entityIdSequence = 0
-}
-
-type Entity struct {
-	ID         int
-	EntityName string
-	components []Component
-}
-
-func NewEntity(entityName string) *Entity {
-	entityIdSequence++
-	return &Entity{ID: entityIdSequence, EntityName: entityName}
-}
-
-func (e *Entity) AddComponent(c Component) *Entity {
-	// todo: components need to be mutable! I wish we could check the interface was hiding a reference
-	e.components = append(e.components, c)
-	return e
-}
-
-func (e *Entity) GetComponents() []Component {
-	return e.components
+type World struct {
+	entities []Entity
 }
 
 type FindComponentsResult struct {
@@ -35,6 +12,24 @@ type FindComponentsResult struct {
 type FindComponentsJoinResult struct {
 	Entity              Entity
 	RequestedComponents map[ComponentType]Component
+}
+
+func (world *World) AddEntity(e Entity) *World {
+	world.entities = append(world.entities, e)
+	return world
+}
+
+func (world *World) RemoveEntity(idToRemove int) {
+	for i, e := range world.entities {
+		if e.ID == idToRemove {
+			world.entities = append(world.entities[:i], world.entities[i+1:]...)
+			break
+		}
+	}
+}
+
+func (world *World) GetEntities() []Entity {
+	return world.entities
 }
 
 func (world World) FindComponents(requestedComponent ComponentType) []FindComponentsResult {

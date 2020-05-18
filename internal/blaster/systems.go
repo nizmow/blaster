@@ -1,9 +1,11 @@
-package main
+package blaster
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/inpututil"
-	"image/color"
+	"github.com/nizmow/blaster/internal/ecs"
 )
 
 const PlayerSpeed = 2
@@ -11,7 +13,7 @@ const MaxPlayerBullets = 5
 
 type Renderer struct{}
 
-func (Renderer) Update(world World, screen *ebiten.Image) error {
+func (Renderer) Update(world ecs.World, screen *ebiten.Image) error {
 	renderables := world.FindComponents(RenderableType)
 	for _, renderCandidate := range renderables {
 		render := renderCandidate.RequestedComponent.(*Renderable)
@@ -27,7 +29,7 @@ func (Renderer) Update(world World, screen *ebiten.Image) error {
 
 type PlayerInput struct{}
 
-func (PlayerInput) Update(world *World) error {
+func (PlayerInput) Update(world *ecs.World) error {
 	player := world.FindComponentsJoin(RenderableType, PlayerType)[0]
 
 	playerRenderable := player.RequestedComponents[RenderableType].(*Renderable)
@@ -46,7 +48,7 @@ func (PlayerInput) Update(world *World) error {
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		playerBulletComponents := world.FindComponents(PlayerBulletType)
 		if len(playerBulletComponents) <= MaxPlayerBullets {
-			bulletEntity := NewEntity("Player Bullet")
+			bulletEntity := ecs.NewEntity("Player Bullet")
 
 			bulletEntity.AddComponent(NewPlayerBullet())
 
@@ -63,7 +65,7 @@ func (PlayerInput) Update(world *World) error {
 
 type PlayerBulletMover struct{}
 
-func (PlayerBulletMover) Update(world *World) error {
+func (PlayerBulletMover) Update(world *ecs.World) error {
 	allPlayerBulletComponents := world.FindComponentsJoin(RenderableType, PlayerBulletType)
 
 	for _, playerBulletComponents := range allPlayerBulletComponents {
