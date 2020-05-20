@@ -15,17 +15,50 @@ const ScreenWidth = 320
 // ScreenHeight is the heigh of the screen
 const ScreenHeight = 240
 
-var world ecs.World
+var renderer rendererSystem
+var playerInput playerInputSystem
+var playerBulletMover playerBulletMoverSystem
+var bulletBaddieCollision bulletBaddieCollisionSystem
+var baddieMover baddieMoverSystem
 
-var renderer Renderer
-var playerInput PlayerInput
-var playerBulletMover PlayerBulletMover
-var bulletBaddieCollision BulletBaddieCollision
-var baddieMoverSystem baddieMover
+type blaster struct {
+	world ecs.World
+}
+
+// Update performs system logic every tick.
+func (g *blaster) Update(screen *ebiten.Image) error {
+	var err error
+
+	err = playerInput.update(&g.world)
+
+	err = playerBulletMover.update(&g.world)
+
+	err = bulletBaddieCollision.update(&g.world)
+
+	err = baddieMover.update(&g.world)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *blaster) Draw(screen *ebiten.Image) {
+
+	screen.Fill(color.Black)
+
+	renderer.update(g.world, screen)
+}
+
+func (g *blaster) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return 320, 240
+}
 
 // Run begins the game loop.
 func Run() {
 	// setup
+	world := ecs.World{}
 
 	// player entity
 	playerEntity := ecs.NewEntity("Player")
@@ -57,40 +90,13 @@ func Run() {
 	}
 
 	// systems
-	renderer = Renderer{}
-	playerInput = PlayerInput{}
-	playerBulletMover = PlayerBulletMover{}
-	bulletBaddieCollision = BulletBaddieCollision{}
-	baddieMoverSystem = baddieMover{}
+	renderer = rendererSystem{}
+	playerInput = playerInputSystem{}
+	playerBulletMover = playerBulletMoverSystem{}
+	bulletBaddieCollision = bulletBaddieCollisionSystem{}
+	baddieMover = baddieMoverSystem{}
 
-	if err := ebiten.Run(update, ScreenWidth, ScreenHeight, 4, "Hello World"); err != nil {
+	if err := ebiten.RunGame(&blaster{world}); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func update(screen *ebiten.Image) error {
-	var err error
-
-	err = playerInput.Update(&world)
-
-	err = playerBulletMover.Update(&world)
-
-	err = bulletBaddieCollision.Update(&world)
-
-	err = baddieMoverSystem.update(&world)
-
-	// RENDER COMMANDS COME AFTER THIS!
-	if ebiten.IsDrawingSkipped() {
-		return nil
-	}
-
-	err = screen.Fill(color.Black)
-
-	err = renderer.Update(world, screen)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

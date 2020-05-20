@@ -15,9 +15,9 @@ const maxPlayerBullets = 3
 
 var currentPlayerBullets int = 0
 
-type Renderer struct{}
+type rendererSystem struct{}
 
-func (Renderer) Update(world ecs.World, screen *ebiten.Image) error {
+func (rendererSystem) update(world ecs.World, screen *ebiten.Image) error {
 	renderables := world.FindComponents(RenderableType)
 	for _, renderCandidate := range renderables {
 		render := renderCandidate.RequestedComponent.(*Renderable)
@@ -31,12 +31,12 @@ func (Renderer) Update(world ecs.World, screen *ebiten.Image) error {
 	return nil
 }
 
-type PlayerInput struct {
+type playerInputSystem struct {
 	gunHeat     int
 	playerSpeed int
 }
 
-func (playerInput *PlayerInput) Update(world *ecs.World) error {
+func (playerInputSystem *playerInputSystem) update(world *ecs.World) error {
 	// We'd better not have multiple players, but if so, ignore them.
 	playerTypeResult := world.FindComponents(PlayerType)[0]
 
@@ -72,9 +72,9 @@ func (playerInput *PlayerInput) Update(world *ecs.World) error {
 	return nil
 }
 
-type PlayerBulletMover struct{}
+type playerBulletMoverSystem struct{}
 
-func (PlayerBulletMover) Update(world *ecs.World) error {
+func (playerBulletMoverSystem) update(world *ecs.World) error {
 	allPlayerBulletComponents := world.FindComponents(PlayerBulletType)
 
 	for _, playerBulletComponents := range allPlayerBulletComponents {
@@ -92,10 +92,10 @@ func (PlayerBulletMover) Update(world *ecs.World) error {
 
 // BulletBaddieCollision contains logic to test for collisions between bullets and baddies,
 // and perform appropriate actions (no more baddies).
-type BulletBaddieCollision struct{}
+type bulletBaddieCollisionSystem struct{}
 
 // Update runs the collision detection system.
-func (BulletBaddieCollision) Update(world *ecs.World) error {
+func (bulletBaddieCollisionSystem) update(world *ecs.World) error {
 	baddieComponentsResult := world.FindComponents(BaddieType)
 	playerBulletComponentsResult := world.FindComponents(PlayerBulletType)
 
@@ -121,9 +121,9 @@ func (BulletBaddieCollision) Update(world *ecs.World) error {
 	return nil
 }
 
-type baddieMover struct{}
+type baddieMoverSystem struct{}
 
-func (baddieMover) update(world *ecs.World) error {
+func (baddieMoverSystem) update(world *ecs.World) error {
 	baddieComponentsResult := world.FindComponents(BaddieType)
 	// First we have to check if any baddies in any group will become out of bounds.
 	// We can only movie baddies if we're sure we won't change the group movement
@@ -149,11 +149,11 @@ func (baddieMover) update(world *ecs.World) error {
 		baddieGroup := baddie.Entity.GetComponent(BaddieGroupType).(*baddieGroup)
 
 		if baddieGroup.direction == 1 {
-			baddieRenderable.Location.X += 1
+			baddieRenderable.Location.X += baddieSpeed
 		}
 
 		if baddieGroup.direction == -1 {
-			baddieRenderable.Location.X -= 1
+			baddieRenderable.Location.X -= baddieSpeed
 		}
 	}
 
