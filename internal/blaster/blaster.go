@@ -1,6 +1,7 @@
 package blaster
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 
@@ -8,7 +9,10 @@ import (
 	"github.com/nizmow/blaster/internal/ecs"
 )
 
+// ScreenWidth is the width of the screen
 const ScreenWidth = 320
+
+// ScreenHeight is the heigh of the screen
 const ScreenHeight = 240
 
 var world ecs.World
@@ -18,6 +22,7 @@ var playerInput PlayerInput
 var playerBulletMover PlayerBulletMover
 var bulletBaddieCollision BulletBaddieCollision
 
+// Run begins the game loop.
 func Run() {
 	// setup
 
@@ -30,18 +35,22 @@ func Run() {
 
 	world.AddEntity(*playerEntity)
 
-	baddieEntity := ecs.NewEntity("Baddie")
-	baddieImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
-	baddieImage.Fill(color.RGBA{
-		R: 255,
-		G: 0,
-		B: 0,
-		A: 255,
-	})
-	baddieEntity.AddComponent(NewRenderable(baddieImage, (ScreenWidth-16)/2, 20))
-	baddieEntity.AddComponent(NewBaddie())
+	for i := 0; i < 30; i++ {
+		y := 20 + 32*(i/10)
+		x := 8 + 32*(i%10)
+		baddieEntity := ecs.NewEntity(fmt.Sprintf("baddie-%d", i))
+		baddieImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
+		baddieImage.Fill(color.RGBA{
+			R: 255,
+			G: 0,
+			B: 0,
+			A: 255,
+		})
+		baddieEntity.AddComponent(NewRenderable(baddieImage, x, y))
+		baddieEntity.AddComponent(NewBaddie())
 
-	world.AddEntity(*baddieEntity)
+		world.AddEntity(*baddieEntity)
+	}
 
 	// systems
 	renderer = Renderer{}
@@ -49,7 +58,7 @@ func Run() {
 	playerBulletMover = PlayerBulletMover{}
 	bulletBaddieCollision = BulletBaddieCollision{}
 
-	if err := ebiten.Run(update, ScreenWidth, ScreenHeight, 2, "Hello World"); err != nil {
+	if err := ebiten.Run(update, ScreenWidth, ScreenHeight, 4, "Hello World"); err != nil {
 		log.Fatal(err)
 	}
 }
