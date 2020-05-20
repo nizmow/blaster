@@ -21,6 +21,7 @@ var renderer Renderer
 var playerInput PlayerInput
 var playerBulletMover PlayerBulletMover
 var bulletBaddieCollision BulletBaddieCollision
+var baddieMoverSystem baddieMover
 
 // Run begins the game loop.
 func Run() {
@@ -35,6 +36,8 @@ func Run() {
 
 	world.AddEntity(*playerEntity)
 
+	baddieGroup := newBaddieGroup()
+	baddieGroup.direction = 1
 	for i := 0; i < 30; i++ {
 		y := 20 + 32*(i/10)
 		x := 8 + 32*(i%10)
@@ -48,6 +51,7 @@ func Run() {
 		})
 		baddieEntity.AddComponent(NewRenderable(baddieImage, x, y))
 		baddieEntity.AddComponent(NewBaddie())
+		baddieEntity.AddComponent(baddieGroup)
 
 		world.AddEntity(*baddieEntity)
 	}
@@ -57,6 +61,7 @@ func Run() {
 	playerInput = PlayerInput{}
 	playerBulletMover = PlayerBulletMover{}
 	bulletBaddieCollision = BulletBaddieCollision{}
+	baddieMoverSystem = baddieMover{}
 
 	if err := ebiten.Run(update, ScreenWidth, ScreenHeight, 4, "Hello World"); err != nil {
 		log.Fatal(err)
@@ -71,6 +76,8 @@ func update(screen *ebiten.Image) error {
 	err = playerBulletMover.Update(&world)
 
 	err = bulletBaddieCollision.Update(&world)
+
+	err = baddieMoverSystem.update(&world)
 
 	// RENDER COMMANDS COME AFTER THIS!
 	if ebiten.IsDrawingSkipped() {

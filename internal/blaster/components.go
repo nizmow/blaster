@@ -13,6 +13,7 @@ const (
 	PlayerBulletType ecs.ComponentType = iota
 	BaddieType       ecs.ComponentType = iota
 	HitBoxType       ecs.ComponentType = iota
+	BaddieGroupType  ecs.ComponentType = iota
 )
 
 // Renderable
@@ -67,4 +68,16 @@ func (*Baddie) ComponentType() ecs.ComponentType {
 
 func NewBaddie() *Baddie {
 	return &Baddie{}
+}
+
+type baddieGroup struct {
+	direction int
+}
+
+func (*baddieGroup) ComponentType() ecs.ComponentType {
+	return BaddieGroupType
+}
+
+func newBaddieGroup() *baddieGroup {
+	return &baddieGroup{1}
 }

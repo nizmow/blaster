@@ -9,8 +9,11 @@ import (
 	"github.com/nizmow/blaster/internal/ecs"
 )
 
-const PlayerSpeed = 2
-const MaxPlayerBullets = 5
+const playerSpeed = 2
+const baddieSpeed = 1
+const maxPlayerBullets = 3
+
+var currentPlayerBullets int = 0
 
 type Renderer struct{}
 
@@ -29,7 +32,8 @@ func (Renderer) Update(world ecs.World, screen *ebiten.Image) error {
 }
 
 type PlayerInput struct {
-	gunHeat int
+	gunHeat     int
+	playerSpeed int
 }
 
 func (playerInput *PlayerInput) Update(world *ecs.World) error {
@@ -41,20 +45,18 @@ func (playerInput *PlayerInput) Update(world *ecs.World) error {
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft):
 		if playerRenderable.Location.X > 2 {
-			playerRenderable.Location.X -= PlayerSpeed
+			playerRenderable.Location.X -= playerSpeed
 		}
 	case ebiten.IsKeyPressed(ebiten.KeyRight):
 		if playerRenderable.Location.X < ScreenWidth-18 {
-			playerRenderable.Location.X += PlayerSpeed
+			playerRenderable.Location.X += playerSpeed
 		}
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		// fire a bullet, but only if our gun isn't too hot!
-		if playerInput.gunHeat < 200 {
-			playerInput.gunHeat = playerInput.gunHeat + 50
-			fmt.Printf("Player firing, heat is now %d\n", playerInput.gunHeat)
-			bulletEntity := ecs.NewEntity("Player Bullet")
+		if currentPlayerBullets < maxPlayerBullets {
+			bulletEntity := ecs.NewEntity(fmt.Sprintf("player-bullet-%d", currentPlayerBullets))
 
 			bulletEntity.AddComponent(NewPlayerBullet())
 
@@ -63,14 +65,7 @@ func (playerInput *PlayerInput) Update(world *ecs.World) error {
 			bulletEntity.AddComponent(NewRenderable(image, playerRenderable.Location.X+7, playerRenderable.Location.Y))
 
 			world.AddEntity(*bulletEntity)
-		}
-	}
-
-	// Cool down the gun.
-	if playerInput.gunHeat > 0 {
-		playerInput.gunHeat = playerInput.gunHeat - 1
-		if playerInput.gunHeat%10 == 0 {
-			fmt.Printf("Gun cooling, heat is now %d\n", playerInput.gunHeat)
+			currentPlayerBullets++
 		}
 	}
 
@@ -88,6 +83,7 @@ func (PlayerBulletMover) Update(world *ecs.World) error {
 			playerBulletRenderable.Location.Y -= 5
 		} else {
 			world.RemoveEntity(playerBulletComponents.Entity.ID)
+			currentPlayerBullets--
 		}
 	}
 
@@ -117,7 +113,47 @@ func (BulletBaddieCollision) Update(world *ecs.World) error {
 			if baddieRenderable.TranslateHitboxToScreen().Overlaps(playerBulletRenderable.TranslateHitboxToScreen()) {
 				world.RemoveEntity(playerBullet.Entity.ID)
 				world.RemoveEntity(baddie.Entity.ID)
+				currentPlayerBullets--
 			}
+		}
+	}
+
+	return nil
+}
+
+type baddieMover struct{}
+
+func (baddieMover) update(world *ecs.World) error {
+	baddieComponentsResult := world.FindComponents(BaddieType)
+	// First we have to check if any baddies in any group will become out of bounds.
+	// We can only movie baddies if we're sure we won't change the group movement
+	// direction half way through -- otherwise they break formation!
+	for _, baddie := range baddieComponentsResult {
+		baddieRenderable := baddie.Entity.GetComponent(RenderableType).(*Renderable)
+		baddieGroup := baddie.Entity.GetComponent(BaddieGroupType).(*baddieGroup)
+
+		if baddieGroup.direction == 1 && baddieRenderable.Location.X >= ScreenWidth-18 {
+			// Out of bounds on the right hand side, moving right.
+			baddieGroup.direction = -1
+		}
+
+		if baddieGroup.direction == -1 && baddieRenderable.Location.X < 2 {
+			// Out of bounds on the left hand side, moving left.
+			baddieGroup.direction = 1
+		}
+	}
+
+	// Now we just move our baddies in accodance with the direction of the group.
+	for _, baddie := range baddieComponentsResult {
+		baddieRenderable := baddie.Entity.GetComponent(RenderableType).(*Renderable)
+		baddieGroup := baddie.Entity.GetComponent(BaddieGroupType).(*baddieGroup)
+
+		if baddieGroup.direction == 1 {
+			baddieRenderable.Location.X += 1
+		}
+
+		if baddieGroup.direction == -1 {
+			baddieRenderable.Location.X -= 1
 		}
 	}
 
