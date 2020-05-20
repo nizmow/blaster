@@ -16,6 +16,7 @@ var world ecs.World
 var renderer Renderer
 var playerInput PlayerInput
 var playerBulletMover PlayerBulletMover
+var bulletBaddieCollision BulletBaddieCollision
 
 func Run() {
 	// setup
@@ -26,6 +27,7 @@ func Run() {
 	playerImage.Fill(color.White)
 	playerEntity.AddComponent(NewRenderable(playerImage, (ScreenWidth-16)/2, 200))
 	playerEntity.AddComponent(NewPlayer())
+
 	world.AddEntity(*playerEntity)
 
 	baddieEntity := ecs.NewEntity("Baddie")
@@ -38,12 +40,14 @@ func Run() {
 	})
 	baddieEntity.AddComponent(NewRenderable(baddieImage, (ScreenWidth-16)/2, 20))
 	baddieEntity.AddComponent(NewBaddie())
+
 	world.AddEntity(*baddieEntity)
 
 	// systems
 	renderer = Renderer{}
 	playerInput = PlayerInput{}
 	playerBulletMover = PlayerBulletMover{}
+	bulletBaddieCollision = BulletBaddieCollision{}
 
 	if err := ebiten.Run(update, ScreenWidth, ScreenHeight, 2, "Hello World"); err != nil {
 		log.Fatal(err)
@@ -51,25 +55,23 @@ func Run() {
 }
 
 func update(screen *ebiten.Image) error {
+	var err error
+
+	err = playerInput.Update(&world)
+
+	err = playerBulletMover.Update(&world)
+
+	err = bulletBaddieCollision.Update(&world)
+
+	// RENDER COMMANDS COME AFTER THIS!
 	if ebiten.IsDrawingSkipped() {
 		return nil
 	}
 
-	var err error
-
 	err = screen.Fill(color.Black)
-	if err != nil {
-		return err
-	}
+
 	err = renderer.Update(world, screen)
-	if err != nil {
-		return err
-	}
-	err = playerInput.Update(&world)
-	if err != nil {
-		return err
-	}
-	err = playerBulletMover.Update(&world)
+
 	if err != nil {
 		return err
 	}

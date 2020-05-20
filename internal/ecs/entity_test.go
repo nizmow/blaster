@@ -3,52 +3,47 @@ package ecs
 import "testing"
 
 const (
-	TestRenderableType ComponentType = iota
-	TestPlayerType     ComponentType = iota
-	TestEnemyType      ComponentType = iota
+	SharedComponentType ComponentType = iota
+	UniqueComponentType ComponentType = iota
 )
 
-type TestRenderable struct{}
-
-func (TestRenderable) ComponentType() ComponentType {
-	return TestRenderableType
+type SharedComponent struct {
+	Value int
 }
 
-type TestPlayer struct{}
-
-func (TestPlayer) ComponentType() ComponentType {
-	return TestPlayerType
+func (*SharedComponent) ComponentType() ComponentType {
+	return SharedComponentType
 }
 
-type TestEnemy struct{}
+type UniqueComponent struct{}
 
-func (TestEnemy) ComponentType() ComponentType {
-	return TestEnemyType
+func (*UniqueComponent) ComponentType() ComponentType {
+	return UniqueComponentType
 }
 
-func Test_ComponentsJoin(t *testing.T) {
-	// big boring setup -- this might be a good candidate for creating a builder pattern later
+// Just demonstrate that we can share single component between multiple entities
+func Test_SharedComponent(t *testing.T) {
+	firstEntity := NewEntity("first")
+	secondEntity := NewEntity("second")
+	var world World
 
-	world := World{}
-	entityPlayer := Entity{}
-	entityEnemy := Entity{}
-	componentRenderable1 := TestRenderable{}
-	componentRenderable2 := TestRenderable{}
-	componentPlayer := TestPlayer{}
-	componentEnemy := TestEnemy{}
+	sharedComponent := SharedComponent{Value: 0}
 
-	entityPlayer.components = []Component{componentPlayer, componentRenderable1}
-	entityEnemy.components = []Component{componentEnemy, componentRenderable2}
-	world.entities = []Entity{entityPlayer, entityEnemy}
+	firstEntity.AddComponent(&sharedComponent)
+	firstEntity.AddComponent(&UniqueComponent{})
+	secondEntity.AddComponent(&sharedComponent)
+	secondEntity.AddComponent(&UniqueComponent{})
 
-	results := world.FindComponentsJoin(TestPlayerType, TestRenderableType)
+	world.AddEntity(*firstEntity)
+	world.AddEntity(*secondEntity)
 
-	if len(results) != 1 {
-		t.Errorf("Expected 1 result and got %v", len(results))
+	componentsToManipulate := world.FindComponentsJoin(SharedComponentType, UniqueComponentType)
+	for _, findComponentsResult := range componentsToManipulate {
+		sharedComponentToUpdate := findComponentsResult.RequestedComponents[SharedComponentType].(*SharedComponent)
+		sharedComponentToUpdate.Value++
 	}
 
-	results2 := world.FindComponentsJoin(TestPlayerType, TestEnemyType)
-	if len(results2) != 0 {
-		t.Errorf("Expected 0 results and got %v", len(results2))
+	if sharedComponent.Value != 2 {
+		t.Error("Foo")
 	}
 }

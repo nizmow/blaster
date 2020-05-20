@@ -1,6 +1,7 @@
 package blaster
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -27,12 +28,15 @@ func (Renderer) Update(world ecs.World, screen *ebiten.Image) error {
 	return nil
 }
 
-type PlayerInput struct{}
+type PlayerInput struct {
+	gunHeat int
+}
 
-func (PlayerInput) Update(world *ecs.World) error {
-	player := world.FindComponentsJoin(RenderableType, PlayerType)[0]
+func (playerInput *PlayerInput) Update(world *ecs.World) error {
+	// We'd better not have multiple players, but if so, ignore them.
+	playerTypeResult := world.FindComponents(PlayerType)[0]
 
-	playerRenderable := player.RequestedComponents[RenderableType].(*Renderable)
+	playerRenderable := playerTypeResult.Entity.GetComponent(RenderableType).(*Renderable)
 
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft):
@@ -46,8 +50,10 @@ func (PlayerInput) Update(world *ecs.World) error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-		playerBulletComponents := world.FindComponents(PlayerBulletType)
-		if len(playerBulletComponents) <= MaxPlayerBullets {
+		// fire a bullet, but only if our gun isn't too hot!
+		if playerInput.gunHeat < 200 {
+			playerInput.gunHeat = playerInput.gunHeat + 50
+			fmt.Printf("Player firing, heat is now %d\n", playerInput.gunHeat)
 			bulletEntity := ecs.NewEntity("Player Bullet")
 
 			bulletEntity.AddComponent(NewPlayerBullet())
@@ -60,16 +66,24 @@ func (PlayerInput) Update(world *ecs.World) error {
 		}
 	}
 
+	// Cool down the gun.
+	if playerInput.gunHeat > 0 {
+		playerInput.gunHeat = playerInput.gunHeat - 1
+		if playerInput.gunHeat%10 == 0 {
+			fmt.Printf("Gun cooling, heat is now %d\n", playerInput.gunHeat)
+		}
+	}
+
 	return nil
 }
 
 type PlayerBulletMover struct{}
 
 func (PlayerBulletMover) Update(world *ecs.World) error {
-	allPlayerBulletComponents := world.FindComponentsJoin(RenderableType, PlayerBulletType)
+	allPlayerBulletComponents := world.FindComponents(PlayerBulletType)
 
 	for _, playerBulletComponents := range allPlayerBulletComponents {
-		playerBulletRenderable := playerBulletComponents.RequestedComponents[RenderableType].(*Renderable)
+		playerBulletRenderable := playerBulletComponents.Entity.GetComponent(RenderableType).(*Renderable)
 		if playerBulletRenderable.Location.Y > 0 {
 			playerBulletRenderable.Location.Y -= 5
 		} else {
@@ -80,17 +94,32 @@ func (PlayerBulletMover) Update(world *ecs.World) error {
 	return nil
 }
 
-//type PlayerBulletBaddieCollider struct{}
-//
-//func (PlayerBulletBaddieCollider) Update(world *World) error {
-//	allPlayerBullets := world.FindComponentsJoin(RenderableType, PlayerBulletType)
-//	allBaddies := world.FindComponentsJoin(RenderableType, BaddieType)
-//
-//	for _, playerBullet := range allPlayerBullets {
-//		playerBulletRenderable := playerBullet.RequestedComponents[RenderableType].(*Renderable)
-//
-//		for _, baddie := range allBaddies {
-//
-//		}
-//	}
-//}
+// BulletBaddieCollision contains logic to test for collisions between bullets and baddies,
+// and perform appropriate actions (no more baddies).
+type BulletBaddieCollision struct{}
+
+// Update runs the collision detection system.
+func (BulletBaddieCollision) Update(world *ecs.World) error {
+	baddieComponentsResult := world.FindComponents(BaddieType)
+	playerBulletComponentsResult := world.FindComponents(PlayerBulletType)
+
+	for _, baddie := range baddieComponentsResult {
+		baddieRenderable := baddie.Entity.GetComponent(RenderableType).(*Renderable)
+		if baddieRenderable == nil {
+			continue
+		}
+		for _, playerBullet := range playerBulletComponentsResult {
+			playerBulletRenderable := playerBullet.Entity.GetComponent(RenderableType).(*Renderable)
+			if playerBulletRenderable == nil {
+				break
+			}
+
+			if baddieRenderable.TranslateHitboxToScreen().Overlaps(playerBulletRenderable.TranslateHitboxToScreen()) {
+				world.RemoveEntity(playerBullet.Entity.ID)
+				world.RemoveEntity(baddie.Entity.ID)
+			}
+		}
+	}
+
+	return nil
+}

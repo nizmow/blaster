@@ -1,6 +1,8 @@
 package blaster
 
 import (
+	"image"
+
 	"github.com/hajimehoshi/ebiten"
 	"github.com/nizmow/blaster/internal/ecs"
 )
@@ -16,15 +18,22 @@ const (
 // Renderable
 type Renderable struct {
 	Image    *ebiten.Image
-	Location ecs.Point
+	Location image.Point
+	Hitbox   image.Rectangle
 }
 
 func (*Renderable) ComponentType() ecs.ComponentType {
 	return RenderableType
 }
 
-func NewRenderable(image *ebiten.Image, x int, y int) *Renderable {
-	return &Renderable{image, ecs.Point{x, y}}
+func NewRenderable(renderImage *ebiten.Image, x int, y int) *Renderable {
+	return &Renderable{renderImage, image.Point{x, y}, image.Rectangle{renderImage.Bounds().Min, renderImage.Bounds().Max}}
+}
+
+// TranslateHitboxToScreen translates a renderable's defined hitbox to real screen coordinates
+// based on the current renderable point Location.
+func (renderable *Renderable) TranslateHitboxToScreen() image.Rectangle {
+	return renderable.Hitbox.Add(renderable.Location)
 }
 
 // Player
@@ -58,16 +67,4 @@ func (*Baddie) ComponentType() ecs.ComponentType {
 
 func NewBaddie() *Baddie {
 	return &Baddie{}
-}
-
-// HitBox
-type HitBox struct {
-	TopLeft     ecs.Point
-	TopRight    ecs.Point
-	BottomRight ecs.Point
-	BottomLeft  ecs.Point
-}
-
-func (*HitBox) ComponentType() ecs.ComponentType {
-	return HitBoxType
 }
