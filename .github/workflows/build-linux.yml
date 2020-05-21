@@ -10,10 +10,14 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
 
     - name: Install build prerequisites
+      if: matrix.platform == 'ubuntu-latest'
       run: sudo apt update && sudo apt install -y --no-install-recommends libgl1-mesa-dev xorg-dev
 
     - name: Set up Go 1.x
@@ -40,7 +44,23 @@ jobs:
       run: go test -v ./...
 
     - name: Upload Linux artifact
+      if: matrix.platform == 'ubuntu-latest'
       uses: actions/upload-artifact@v1
       with:
         name: blaster-linux
         path: ./blaster
+    
+    - name: Upload Windows artifact
+      if: matrix.platform == 'windows-latest'
+      uses: actions/upload-artifact@v1
+      with:
+        name: blaster-windows
+        path: ./blaster.exe
+
+    - name: Upload macOS artifact
+      if: matrix.platform == 'macos-latest'
+      uses: actions/upload-artifact@v1
+      with:
+        name: blaster-macos
+        path: ./blaster
+
