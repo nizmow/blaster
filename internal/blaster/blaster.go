@@ -9,12 +9,6 @@ import (
 	"github.com/nizmow/blaster/internal/ecs"
 )
 
-// ScreenWidth is the width of the screen
-const ScreenWidth = 320
-
-// ScreenHeight is the heigh of the screen
-const ScreenHeight = 240
-
 var renderer rendererSystem
 var playerInput playerInputSystem
 var playerBulletMover playerBulletMoverSystem
@@ -22,7 +16,8 @@ var bulletBaddieCollision bulletBaddieCollisionSystem
 var baddieMover baddieMoverSystem
 
 type blaster struct {
-	world ecs.World
+	world  ecs.World
+	buffer *ebiten.Image
 }
 
 // Update performs system logic every tick.
@@ -41,33 +36,34 @@ func (g *blaster) Update(screen *ebiten.Image) error {
 		return err
 	}
 
+	g.buffer.Fill(color.Black)
+
+	renderer.update(g.world, g.buffer)
+
 	return nil
 }
 
 func (g *blaster) Draw(screen *ebiten.Image) {
-
-	screen.Fill(color.Black)
-
-	renderer.update(g.world, screen)
+	screen.DrawImage(g.buffer, nil)
 }
 
 func (g *blaster) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 320, 240
+	return g.world.ScreenWidth, g.world.ScreenHeight
 }
 
-// Run begins the game loop.
-func Run() {
-	// setup
-	world := ecs.World{}
+func (g *blaster) Init() {
+	g.world = ecs.World{ScreenWidth: 320, ScreenHeight: 240}
+
+	g.buffer, _ = ebiten.NewImage(g.world.ScreenWidth, g.world.ScreenHeight, ebiten.FilterDefault)
 
 	// player entity
 	playerEntity := ecs.NewEntity("Player")
 	playerImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	playerImage.Fill(color.White)
-	playerEntity.AddComponent(NewRenderable(playerImage, (ScreenWidth-16)/2, 200))
+	playerEntity.AddComponent(NewRenderable(playerImage, (g.world.ScreenWidth-16)/2, 200))
 	playerEntity.AddComponent(NewPlayer())
 
-	world.AddEntity(*playerEntity)
+	g.world.AddEntity(*playerEntity)
 
 	baddieGroup := newBaddieGroup()
 	baddieGroup.direction = 1
@@ -86,8 +82,15 @@ func Run() {
 		baddieEntity.AddComponent(NewBaddie())
 		baddieEntity.AddComponent(baddieGroup)
 
-		world.AddEntity(*baddieEntity)
+		g.world.AddEntity(*baddieEntity)
 	}
+}
+
+// Run begins the game loop.
+func Run() {
+	// setup
+	game := &blaster{}
+	game.Init()
 
 	// systems
 	renderer = rendererSystem{}
@@ -96,7 +99,7 @@ func Run() {
 	bulletBaddieCollision = bulletBaddieCollisionSystem{}
 	baddieMover = baddieMoverSystem{}
 
-	if err := ebiten.RunGame(&blaster{world}); err != nil {
+	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 }

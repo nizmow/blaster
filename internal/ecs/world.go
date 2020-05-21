@@ -1,7 +1,9 @@
 package ecs
 
 type World struct {
-	entities []Entity
+	entities     []Entity
+	ScreenWidth  int
+	ScreenHeight int
 }
 
 type FindComponentsResult struct {

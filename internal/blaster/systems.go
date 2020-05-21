@@ -48,7 +48,7 @@ func (playerInputSystem *playerInputSystem) update(world *ecs.World) error {
 			playerRenderable.Location.X -= playerSpeed
 		}
 	case ebiten.IsKeyPressed(ebiten.KeyRight):
-		if playerRenderable.Location.X < ScreenWidth-18 {
+		if playerRenderable.Location.X < world.ScreenWidth-18 {
 			playerRenderable.Location.X += playerSpeed
 		}
 	}
@@ -132,7 +132,7 @@ func (baddieMoverSystem) update(world *ecs.World) error {
 		baddieRenderable := baddie.Entity.GetComponent(RenderableType).(*Renderable)
 		baddieGroup := baddie.Entity.GetComponent(BaddieGroupType).(*baddieGroup)
 
-		if baddieGroup.direction == 1 && baddieRenderable.Location.X >= ScreenWidth-18 {
+		if baddieGroup.direction == 1 && baddieRenderable.Location.X >= world.ScreenWidth-18 {
 			// Out of bounds on the right hand side, moving right.
 			baddieGroup.direction = -1
 		}
