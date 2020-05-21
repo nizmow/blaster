@@ -30,6 +30,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Get dependencies
+      shell: bash
       run: |
         go get -v -t -d ./...
         if [ -f Gopkg.toml ]; then
@@ -63,4 +64,3 @@ jobs:
       with:
         name: blaster-macos
         path: ./blaster
-
