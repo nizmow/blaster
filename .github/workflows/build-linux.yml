@@ -1,4 +1,4 @@
-name: Go
+name: Build Linux
 
 on:
   push:
@@ -38,3 +38,9 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Upload Linux artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: blaster-linux
+        path: ./blaster
