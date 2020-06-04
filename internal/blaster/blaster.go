@@ -71,13 +71,13 @@ func (g *blaster) Init() {
 	// Systems will be executed in the order that they are added
 	g.world.AddLogicSystem(&playerInputSystem{})
 	g.world.AddLogicSystem(&playerBulletMoverSystem{})
-	//g.world.AddLogicSystem(&bulletBaddieCollisionSystem{})
 	g.world.AddLogicSystem(&collisionSystem{})
 	g.world.AddLogicSystem(&baddieMoverSystem{})
 
 	g.world.AddRenderSystem(&rendererSystem{})
 
 	g.world.AddEventHandler(&BaddieCollisionEventHandler{})
+	g.world.AddEventHandler(&EntityRemovedEventHandler{})
 }
 
 // Run begins the game loop.

@@ -1,6 +1,9 @@
 package blaster
 
-import "github.com/nizmow/blaster/internal/ecs"
+import (
+	"fmt"
+	"github.com/nizmow/blaster/internal/ecs"
+)
 
 type BaddieCollisionEventHandler struct{}
 
@@ -26,4 +29,15 @@ func (BaddieCollisionEventHandler) HandleEvent(e ecs.Event, world *ecs.World) {
 		world.RemoveEntity(baddieEntity.ID)
 		world.RemoveEntity(bulletEntity.ID)
 	}
+}
+
+type EntityRemovedEventHandler struct{}
+
+func (EntityRemovedEventHandler) DesiredEventType() ecs.EventType {
+	return ecs.EntityRemovedEventType
+}
+
+func (EntityRemovedEventHandler) HandleEvent(e ecs.Event, world *ecs.World) {
+	event := e.(ecs.EntityRemovedEvent)
+	fmt.Printf("Entity '%s' removed!\n", event.Entity.EntityName)
 }

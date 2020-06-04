@@ -42,9 +42,13 @@ func (w *World) Tick(screen *ebiten.Image) error {
 		}
 	}
 
+	// snapshot our events for processing and clear them -- this means any new events are next frame
+	eventsToProcess := w.events
+	w.events = make(map[EventType][]Event)
+
 	// Run event handlers to ensure the world is up to date before rendering
 	for _, eh := range w.eventHandlers {
-		for _, validEvent := range w.events[eh.DesiredEventType()] {
+		for _, validEvent := range eventsToProcess[eh.DesiredEventType()] {
 			eh.HandleEvent(validEvent, w)
 		}
 	}
@@ -62,6 +66,7 @@ func (w *World) Tick(screen *ebiten.Image) error {
 // AddEntity adds an entity to the world.
 func (w *World) AddEntity(e Entity) *World {
 	w.entities = append(w.entities, e)
+	w.FireEvent(EntityAddedEvent{e})
 	return w
 }
 
@@ -70,6 +75,7 @@ func (w *World) RemoveEntity(idToRemove int) {
 	for i, e := range w.entities {
 		if e.ID == idToRemove {
 			w.entities = append(w.entities[:i], w.entities[i+1:]...)
+			w.FireEvent(EntityRemovedEvent{e})
 			break
 		}
 	}
