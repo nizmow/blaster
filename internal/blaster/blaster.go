@@ -14,10 +14,13 @@ type blaster struct {
 	buffer *ebiten.Image
 }
 
+var ticks = 0
+
 // Update performs system logic every tick (60 per second)
 func (g *blaster) Update(screen *ebiten.Image) error {
 	err := g.world.LogicTick()
 	err = g.world.RenderTick(g.buffer)
+	ticks++
 	return err
 }
 
@@ -62,14 +65,14 @@ func (g *blaster) Init() {
 		baddieGroup.numberOfEntities++
 
 		g.world.AddEntity(*baddieEntity)
-
-		// systems
-		g.world.AddLogicSystem(&playerInputSystem{})
-		g.world.AddLogicSystem(&playerBulletMoverSystem{})
-		g.world.AddLogicSystem(&bulletBaddieCollisionSystem{})
-		g.world.AddLogicSystem(&baddieMoverSystem{})
-		g.world.AddRenderSystem(&rendererSystem{})
 	}
+
+	// Systems will be executed in the order that they are added
+	g.world.AddLogicSystem(&playerInputSystem{})
+	g.world.AddLogicSystem(&playerBulletMoverSystem{})
+	g.world.AddLogicSystem(&bulletBaddieCollisionSystem{})
+	g.world.AddLogicSystem(&baddieMoverSystem{})
+	g.world.AddRenderSystem(&rendererSystem{})
 }
 
 // Run begins the game loop.

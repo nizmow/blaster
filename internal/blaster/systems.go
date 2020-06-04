@@ -39,6 +39,8 @@ type playerInputSystem struct {
 }
 
 func (playerInputSystem *playerInputSystem) Update(world *ecs.World) error {
+	fmt.Print("Input Update")
+
 	// We'd better not have multiple players, but if so, ignore them.
 	playerTypeResult := world.FindEntitiesWithComponent(PlayerType)[0]
 
