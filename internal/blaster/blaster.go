@@ -18,8 +18,7 @@ var ticks = 0
 
 // Update performs system logic every tick (60 per second)
 func (g *blaster) Update(screen *ebiten.Image) error {
-	err := g.world.LogicTick()
-	err = g.world.RenderTick(g.buffer)
+	err := g.world.Tick(g.buffer)
 	ticks++
 	return err
 }
@@ -33,7 +32,9 @@ func (g *blaster) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHe
 }
 
 func (g *blaster) Init() {
-	g.world = ecs.World{ScreenWidth: 320, ScreenHeight: 240}
+	//g.world = ecs.World{ScreenWidth: 320, ScreenHeight: 240}
+
+	g.world = ecs.NewWorld(320, 240)
 
 	g.buffer, _ = ebiten.NewImage(g.world.ScreenWidth, g.world.ScreenHeight, ebiten.FilterDefault)
 
@@ -70,9 +71,13 @@ func (g *blaster) Init() {
 	// Systems will be executed in the order that they are added
 	g.world.AddLogicSystem(&playerInputSystem{})
 	g.world.AddLogicSystem(&playerBulletMoverSystem{})
-	g.world.AddLogicSystem(&bulletBaddieCollisionSystem{})
+	//g.world.AddLogicSystem(&bulletBaddieCollisionSystem{})
+	g.world.AddLogicSystem(&collisionSystem{})
 	g.world.AddLogicSystem(&baddieMoverSystem{})
+
 	g.world.AddRenderSystem(&rendererSystem{})
+
+	g.world.AddEventHandler(&BaddieCollisionEventHandler{})
 }
 
 // Run begins the game loop.

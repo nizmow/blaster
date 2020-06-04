@@ -3,12 +3,14 @@ package ecs
 import "github.com/hajimehoshi/ebiten"
 
 type World struct {
+	ScreenWidth  int
+	ScreenHeight int
+
 	entities      []Entity
-	ScreenWidth   int
-	ScreenHeight  int
-	events        map[EventType]Event
+	events        map[EventType][]Event
 	logicSystems  []LogicSystem
 	renderSystems []RenderSystem
+	eventHandlers []EventHandler
 }
 
 type FindEntitiesWithComponentResult struct {
@@ -21,8 +23,32 @@ type FindEntitiesWithComponentsResult struct {
 	RequestedComponents map[ComponentType]Component
 }
 
-// RenderTick ticks over the rendering to the given image, mostly because this is the way ebiten wants to work.
-func (w *World) RenderTick(screen *ebiten.Image) error {
+func NewWorld(screenWidth int, screenHeight int) World {
+	return World{
+		events:       make(map[EventType][]Event),
+		ScreenWidth:  screenWidth,
+		ScreenHeight: screenHeight,
+	}
+}
+
+// Tick runs the game world, logic then renderer. Please pass an image that's a buffer here, so it can be swapped to
+// screen during render to ensure things keep running correctly.
+func (w *World) Tick(screen *ebiten.Image) error {
+	// Run logic systems first to ensure the world is up to date before firing events
+	for _, ls := range w.logicSystems {
+		err := ls.Update(w)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Run event handlers to ensure the world is up to date before rendering
+	for _, eh := range w.eventHandlers {
+		for _, validEvent := range w.events[eh.DesiredEventType()] {
+			eh.HandleEvent(validEvent, w)
+		}
+	}
+
 	for _, rs := range w.renderSystems {
 		err := rs.Update(w, screen)
 		if err != nil {
@@ -33,45 +59,32 @@ func (w *World) RenderTick(screen *ebiten.Image) error {
 	return nil
 }
 
-// LogicTick ticks over the game logic, so we can run logic independently of rendering if we need to. Mostly it's a
-// bit because this is the way ebiten wants to work.
-func (w *World) LogicTick() error {
-	for _, ls := range w.logicSystems {
-		err := ls.Update(w)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // AddEntity adds an entity to the world.
-func (world *World) AddEntity(e Entity) *World {
-	world.entities = append(world.entities, e)
-	return world
+func (w *World) AddEntity(e Entity) *World {
+	w.entities = append(w.entities, e)
+	return w
 }
 
 // RemoveEntity removes an entity from the world.
-func (world *World) RemoveEntity(idToRemove int) {
-	for i, e := range world.entities {
+func (w *World) RemoveEntity(idToRemove int) {
+	for i, e := range w.entities {
 		if e.ID == idToRemove {
-			world.entities = append(world.entities[:i], world.entities[i+1:]...)
+			w.entities = append(w.entities[:i], w.entities[i+1:]...)
 			break
 		}
 	}
 }
 
 // GetEntities returns all entities in the world.
-func (world *World) GetEntities() []Entity {
-	return world.entities
+func (w *World) GetEntities() []Entity {
+	return w.entities
 }
 
 // FindEntitiesWithComponent finds ALL entities that have the requested component attached.
-func (world World) FindEntitiesWithComponent(requestedComponent ComponentType) []FindEntitiesWithComponentResult {
+func (w World) FindEntitiesWithComponent(requestedComponent ComponentType) []FindEntitiesWithComponentResult {
 	var results []FindEntitiesWithComponentResult
 
-	for _, entity := range world.GetEntities() {
+	for _, entity := range w.GetEntities() {
 		for _, entityComponent := range entity.GetComponents() {
 			if entityComponent.ComponentType() == requestedComponent {
 				results = append(results, FindEntitiesWithComponentResult{entity, entityComponent})
@@ -83,11 +96,11 @@ func (world World) FindEntitiesWithComponent(requestedComponent ComponentType) [
 }
 
 // FindEntitiesWithComponents finds ALL entities that have ALL the requested components attached.
-func (world World) FindEntitiesWithComponents(requestedComponents ...ComponentType) []FindEntitiesWithComponentsResult {
+func (w World) FindEntitiesWithComponents(requestedComponents ...ComponentType) []FindEntitiesWithComponentsResult {
 	var results []FindEntitiesWithComponentsResult
 
 	// for all entities in the world
-	for _, entity := range world.GetEntities() {
+	for _, entity := range w.GetEntities() {
 		// for each component in this entity
 		matchedComponents := make(map[ComponentType]Component)
 		for _, entityComponent := range entity.GetComponents() {
@@ -122,7 +135,7 @@ func (world World) FindEntitiesWithComponents(requestedComponents ...ComponentTy
 }
 
 func (w *World) FireEvent(e Event) {
-	w.events[e.EventType()] = e
+	w.events[e.EventType()] = append(w.events[e.EventType()], e)
 }
 
 func (w *World) AddRenderSystem(s RenderSystem) {
@@ -131,4 +144,8 @@ func (w *World) AddRenderSystem(s RenderSystem) {
 
 func (w *World) AddLogicSystem(s LogicSystem) {
 	w.logicSystems = append(w.logicSystems, s)
+}
+
+func (w *World) AddEventHandler(e EventHandler) {
+	w.eventHandlers = append(w.eventHandlers, e)
 }

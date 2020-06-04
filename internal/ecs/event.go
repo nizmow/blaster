@@ -9,3 +9,9 @@ type EventType int
 type Event interface {
 	EventType() EventType
 }
+
+// EventHandlers will be called to handle any fired events of the particular type they're interested in.
+type EventHandler interface {
+	DesiredEventType() EventType
+	HandleEvent(Event, *World)
+}

@@ -18,8 +18,7 @@ func (*BaddieRemovedEvent) EventType() ecs.EventType {
 
 // CollisionEvent is fired when two renderables collide.
 type CollisionEvent struct {
-	FirstEntity ecs.Entity
-	OtherEntity ecs.Entity
+	InvolvedEntities []ecs.Entity
 }
 
 func (*CollisionEvent) EventType() ecs.EventType {

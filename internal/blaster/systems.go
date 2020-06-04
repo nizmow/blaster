@@ -39,8 +39,6 @@ type playerInputSystem struct {
 }
 
 func (playerInputSystem *playerInputSystem) Update(world *ecs.World) error {
-	fmt.Print("Input Update")
-
 	// We'd better not have multiple players, but if so, ignore them.
 	playerTypeResult := world.FindEntitiesWithComponent(PlayerType)[0]
 
@@ -118,6 +116,26 @@ func (bulletBaddieCollisionSystem) Update(world *ecs.World) error {
 				world.RemoveEntity(playerBullet.Entity.ID)
 				world.RemoveEntity(baddie.Entity.ID)
 				currentPlayerBullets--
+			}
+		}
+	}
+
+	return nil
+}
+
+type collisionSystem struct{}
+
+func (collisionSystem) Update(world *ecs.World) error {
+	renderableResults := world.FindEntitiesWithComponent(RenderableType)
+	for _, sourceRenderableResult := range renderableResults {
+		sourceRenderable := sourceRenderableResult.RequestedComponent.(*Renderable)
+		for _, targetRenderableResult := range renderableResults {
+			targetRenderable := targetRenderableResult.RequestedComponent.(*Renderable)
+
+			if sourceRenderable.TranslateHitboxToScreen().Overlaps(targetRenderable.TranslateHitboxToScreen()) {
+				world.FireEvent(&CollisionEvent{
+					InvolvedEntities: []ecs.Entity{sourceRenderableResult.Entity, targetRenderableResult.Entity},
+				})
 			}
 		}
 	}
