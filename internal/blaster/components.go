@@ -8,12 +8,11 @@ import (
 )
 
 const (
-	RenderableType   ecs.ComponentType = iota
-	PlayerType       ecs.ComponentType = iota
-	PlayerBulletType ecs.ComponentType = iota
-	BaddieType       ecs.ComponentType = iota
-	HitBoxType       ecs.ComponentType = iota
-	BaddieGroupType  ecs.ComponentType = iota
+	RenderableType ecs.ComponentType = iota
+	PlayerType
+	PlayerBulletType
+	BaddieType
+	BaddieGroupType
 )
 
 // Renderable
@@ -71,7 +70,11 @@ func NewBaddie() *Baddie {
 }
 
 type baddieGroup struct {
-	direction int
+	// direction of 1 is right, -1 is left, 0 is still
+	direction        int
+	ticksPerMove     int
+	ticksUntilMove   int
+	numberOfEntities int
 }
 
 func (*baddieGroup) ComponentType() ecs.ComponentType {
@@ -79,5 +82,5 @@ func (*baddieGroup) ComponentType() ecs.ComponentType {
 }
 
 func newBaddieGroup() *baddieGroup {
-	return &baddieGroup{1}
+	return &baddieGroup{1, 30, 30, 0}
 }

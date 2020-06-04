@@ -17,8 +17,10 @@ var currentPlayerBullets int = 0
 
 type rendererSystem struct{}
 
-func (rendererSystem) update(world ecs.World, screen *ebiten.Image) error {
-	renderables := world.FindComponents(RenderableType)
+func (rendererSystem) Update(world *ecs.World, screen *ebiten.Image) error {
+	screen.Fill(color.Black)
+
+	renderables := world.FindEntitiesWithComponent(RenderableType)
 	for _, renderCandidate := range renderables {
 		render := renderCandidate.RequestedComponent.(*Renderable)
 		opts := &ebiten.DrawImageOptions{}
@@ -36,9 +38,9 @@ type playerInputSystem struct {
 	playerSpeed int
 }
 
-func (playerInputSystem *playerInputSystem) update(world *ecs.World) error {
+func (playerInputSystem *playerInputSystem) Update(world *ecs.World) error {
 	// We'd better not have multiple players, but if so, ignore them.
-	playerTypeResult := world.FindComponents(PlayerType)[0]
+	playerTypeResult := world.FindEntitiesWithComponent(PlayerType)[0]
 
 	playerRenderable := playerTypeResult.Entity.GetComponent(RenderableType).(*Renderable)
 
@@ -74,8 +76,8 @@ func (playerInputSystem *playerInputSystem) update(world *ecs.World) error {
 
 type playerBulletMoverSystem struct{}
 
-func (playerBulletMoverSystem) update(world *ecs.World) error {
-	allPlayerBulletComponents := world.FindComponents(PlayerBulletType)
+func (playerBulletMoverSystem) Update(world *ecs.World) error {
+	allPlayerBulletComponents := world.FindEntitiesWithComponent(PlayerBulletType)
 
 	for _, playerBulletComponents := range allPlayerBulletComponents {
 		playerBulletRenderable := playerBulletComponents.Entity.GetComponent(RenderableType).(*Renderable)
@@ -95,9 +97,9 @@ func (playerBulletMoverSystem) update(world *ecs.World) error {
 type bulletBaddieCollisionSystem struct{}
 
 // Update runs the collision detection system.
-func (bulletBaddieCollisionSystem) update(world *ecs.World) error {
-	baddieComponentsResult := world.FindComponents(BaddieType)
-	playerBulletComponentsResult := world.FindComponents(PlayerBulletType)
+func (bulletBaddieCollisionSystem) Update(world *ecs.World) error {
+	baddieComponentsResult := world.FindEntitiesWithComponent(BaddieType)
+	playerBulletComponentsResult := world.FindEntitiesWithComponent(PlayerBulletType)
 
 	for _, baddie := range baddieComponentsResult {
 		baddieRenderable := baddie.Entity.GetComponent(RenderableType).(*Renderable)
@@ -123,8 +125,9 @@ func (bulletBaddieCollisionSystem) update(world *ecs.World) error {
 
 type baddieMoverSystem struct{}
 
-func (baddieMoverSystem) update(world *ecs.World) error {
-	baddieComponentsResult := world.FindComponents(BaddieType)
+func (baddieMoverSystem) Update(world *ecs.World) error {
+	baddieComponentsResult := world.FindEntitiesWithComponent(BaddieType)
+
 	// First we have to check if any baddies in any group will become out of bounds.
 	// We can only movie baddies if we're sure we won't change the group movement
 	// direction half way through -- otherwise they break formation!
@@ -143,17 +146,26 @@ func (baddieMoverSystem) update(world *ecs.World) error {
 		}
 	}
 
-	// Now we just move our baddies in accodance with the direction of the group.
+	// Move baddies in accordance with group direction and if it's time for a move
 	for _, baddie := range baddieComponentsResult {
 		baddieRenderable := baddie.Entity.GetComponent(RenderableType).(*Renderable)
 		baddieGroup := baddie.Entity.GetComponent(BaddieGroupType).(*baddieGroup)
 
-		if baddieGroup.direction == 1 {
-			baddieRenderable.Location.X += baddieSpeed
+		if baddieGroup.ticksUntilMove <= 0 {
+			baddieRenderable.Location.X += (baddieSpeed * baddieGroup.direction)
 		}
+	}
 
-		if baddieGroup.direction == -1 {
-			baddieRenderable.Location.X -= baddieSpeed
+	// Update ticks remaining in the baddie groups
+	baddieGroupResults := world.FindEntitiesWithComponent(BaddieGroupType)
+
+	for _, baddieGroupResult := range baddieGroupResults {
+		baddieGroupComponent := baddieGroupResult.RequestedComponent.(*baddieGroup)
+
+		if baddieGroupComponent.ticksUntilMove <= 0 {
+			baddieGroupComponent.ticksUntilMove = baddieGroupComponent.ticksPerMove
+		} else {
+			baddieGroupComponent.ticksUntilMove--
 		}
 	}
 

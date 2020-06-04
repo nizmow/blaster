@@ -9,42 +9,20 @@ import (
 	"github.com/nizmow/blaster/internal/ecs"
 )
 
-var renderer rendererSystem
-var playerInput playerInputSystem
-var playerBulletMover playerBulletMoverSystem
-var bulletBaddieCollision bulletBaddieCollisionSystem
-var baddieMover baddieMoverSystem
-
 type blaster struct {
 	world  ecs.World
 	buffer *ebiten.Image
 }
 
-// Update performs system logic every tick.
+// Update performs system logic every tick (60 per second)
 func (g *blaster) Update(screen *ebiten.Image) error {
-	var err error
-
-	err = playerInput.update(&g.world)
-
-	err = playerBulletMover.update(&g.world)
-
-	err = bulletBaddieCollision.update(&g.world)
-
-	err = baddieMover.update(&g.world)
-
-	if err != nil {
-		return err
-	}
-
-	g.buffer.Fill(color.Black)
-
-	renderer.update(g.world, g.buffer)
-
-	return nil
+	err := g.world.LogicTick()
+	err = g.world.RenderTick(g.buffer)
+	return err
 }
 
 func (g *blaster) Draw(screen *ebiten.Image) {
-	screen.DrawImage(g.buffer, nil)
+	_ = screen.DrawImage(g.buffer, nil)
 }
 
 func (g *blaster) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -81,8 +59,16 @@ func (g *blaster) Init() {
 		baddieEntity.AddComponent(NewRenderable(baddieImage, x, y))
 		baddieEntity.AddComponent(NewBaddie())
 		baddieEntity.AddComponent(baddieGroup)
+		baddieGroup.numberOfEntities++
 
 		g.world.AddEntity(*baddieEntity)
+
+		// systems
+		g.world.AddLogicSystem(&playerInputSystem{})
+		g.world.AddLogicSystem(&playerBulletMoverSystem{})
+		g.world.AddLogicSystem(&bulletBaddieCollisionSystem{})
+		g.world.AddLogicSystem(&baddieMoverSystem{})
+		g.world.AddRenderSystem(&rendererSystem{})
 	}
 }
 
@@ -92,12 +78,8 @@ func Run() {
 	game := &blaster{}
 	game.Init()
 
-	// systems
-	renderer = rendererSystem{}
-	playerInput = playerInputSystem{}
-	playerBulletMover = playerBulletMoverSystem{}
-	bulletBaddieCollision = bulletBaddieCollisionSystem{}
-	baddieMover = baddieMoverSystem{}
+	ebiten.SetWindowSize(1024, 768)
+	ebiten.SetWindowTitle("blaster by nizmow")
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

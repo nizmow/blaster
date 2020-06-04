@@ -14,11 +14,11 @@ type Rect struct {
 
 func NewRect(topLeft Point, bottomRight Point) (Rect, error) {
 	if topLeft.X > bottomRight.X {
-		return Rect{}, errors.New("Unable to create rect with right on the left!")
+		return Rect{}, errors.New("unable to create rect with right on the left")
 	}
 
 	if topLeft.Y > bottomRight.Y {
-		return Rect{}, errors.New("Unable to create rect with top on the bottom!")
+		return Rect{}, errors.New("unable to create rect with top on the bottom")
 	}
 
 	return Rect{topLeft, bottomRight}, nil

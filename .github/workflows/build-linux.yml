@@ -1,4 +1,4 @@
-name: Build Linux
+name: Build
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-
   build:
     name: Build
     runs-on: ${{ matrix.os }}
